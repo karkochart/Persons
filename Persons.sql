@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 16, 2014 at 11:03 AM
+-- Generation Time: Sep 23, 2014 at 01:19 AM
 -- Server version: 5.5.38-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.3
 
@@ -53,7 +53,25 @@ CREATE TABLE IF NOT EXISTS `Marks` (
   `Subj_ID` int(16) NOT NULL,
   `Mark` int(3) NOT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
+
+--
+-- Dumping data for table `Marks`
+--
+
+INSERT INTO `Marks` (`ID`, `Pers_ID`, `Subj_ID`, `Mark`) VALUES
+(1, 1, 1, 4),
+(2, 1, 2, 6),
+(3, 2, 1, 6),
+(7, 7, 1, 4),
+(8, 8, 1, 10),
+(9, 8, 2, 10),
+(10, 9, 1, 5),
+(11, 9, 2, 3),
+(16, 6, 2, 8),
+(18, 4, 2, 6),
+(19, 4, 1, 2),
+(20, 5, 2, 5);
 
 -- --------------------------------------------------------
 
@@ -67,16 +85,22 @@ CREATE TABLE IF NOT EXISTS `Personal` (
   `Surname` varchar(32) NOT NULL,
   `Age` int(3) NOT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=27 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
 
 --
 -- Dumping data for table `Personal`
 --
 
 INSERT INTO `Personal` (`ID`, `Name`, `Surname`, `Age`) VALUES
-(24, 'Garry', 'Fawler', 64),
-(25, 'Simone', 'Zaza', 22),
-(26, 'Pol', 'SCOULS', 32);
+(1, 'Karen', 'Kochinyan', 24),
+(2, 'Cristian', 'Tesh', 34),
+(3, 'Poul', 'Johnson', 18),
+(4, 'Cristian', 'Tesh', 36),
+(5, 'Tomy', 'Cunkler', 64),
+(6, 'Karen', 'Tesh', 20),
+(7, 'Paul', 'Robben', 36),
+(8, 'Mark', 'Yohanson', 54),
+(9, 'Anton', 'Schultz', 51);
 
 -- --------------------------------------------------------
 
@@ -89,7 +113,20 @@ CREATE TABLE IF NOT EXISTS `State` (
   `Pers_ID` int(11) NOT NULL,
   `Cat_ID` int(11) NOT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+
+--
+-- Dumping data for table `State`
+--
+
+INSERT INTO `State` (`ID`, `Pers_ID`, `Cat_ID`) VALUES
+(1, 1, 1),
+(2, 2, 3),
+(4, 5, 1),
+(5, 7, 1),
+(6, 8, 2),
+(7, 9, 3),
+(10, 6, 3);
 
 -- --------------------------------------------------------
 
@@ -108,8 +145,8 @@ CREATE TABLE IF NOT EXISTS `Subjects` (
 --
 
 INSERT INTO `Subjects` (`ID`, `Name`) VALUES
-(1, 'Js'),
-(2, 'Php');
+(1, 'js'),
+(2, 'php');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

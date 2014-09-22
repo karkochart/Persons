@@ -1,8 +1,9 @@
+<?php require_once("functions.php"); ?>
 <html>
 <head>
 </head>
 <body>
-	<form method="post">
+	<form method="get">
 		<table>
 			<tr>
 				<td>Name</td>
@@ -21,109 +22,46 @@
 				<td><input type="text" name="surname"/></td>
 				<td>
 					<select name="age">
-						<option></option>
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
-						<option>6</option>
-						<option>7</option>
-						<option>8</option>
-						<option>9</option>	
-						<option>10</option>
+						<?php echo options_html(16,80); ?>
 					</select>
 				</td>			
 				<td>
 					<select name="ageto">
-						<option></option>
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
-						<option>6</option>
-						<option>7</option>
-						<option>8</option>
-						<option>9</option>	
-						<option>10</option>
+						<?php echo options_html(16,80); ?>
 					</select>
 				</td>			
 				<td>
 					<select name="category">
-						<option></option>
-						<option>Employe</option>
-						<option>Student</option>
-						<option>Intern</option>
+						<?php echo options_html(NULL, NULL, NULL, true); ?>
 					</select>
 				</td>	
 				<td>
 					<select name="js">
-						<option></option>
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
-						<option>6</option>
-						<option>7</option>
-						<option>8</option>
-						<option>9</option>	
-						<option>10</option>
+						<?php echo options_html(1,10); ?>
 					</select>
 				</td>			
 				<td>
 					<select name="jsto">
-						<option></option>
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
-						<option>6</option>
-						<option>7</option>
-						<option>8</option>
-						<option>9</option>	
-						<option>10</option>
+						<?php echo options_html(1,10); ?>
 					</select>
 				</td>			
 				<td>
 					<select name="php">
-						<option></option>
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
-						<option>6</option>
-						<option>7</option>
-						<option>8</option>
-						<option>9</option>	
-						<option>10</option>
+						<?php echo options_html(1,10); ?>
 					</select>
 				</td>			
 				<td>
 					<select name="phpto">
-						<option></option>
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
-						<option>6</option>
-						<option>7</option>
-						<option>8</option>
-						<option>9</option>	
-						<option>10</option>
+						<?php echo options_html(1,10); ?>
 					</select>
 				</td>			
-				<td><input type="submit" value="Add person" /></td>
+				<td><input type="submit" value="Filter persons" name="filter" /></td>
 			</tr>
 		</table>
 	</form>
+<a href='index.php'>Add person</a>
 <?php
 
-require_once("functions.php"); 
 show_persons();
 
 ?>
