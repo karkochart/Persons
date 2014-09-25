@@ -36,7 +36,7 @@ function get_form_result($method){
 
 function connect_DB(){
 
-	//connect DB
+	//query DB
 	$connect=mysqli_connect("localhost","root","pas","Persons");
 	if (mysqli_connect_errno()) {
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
@@ -50,6 +50,8 @@ function close_DB(){
 }
 
 function add_personal_date($name, $surname, $age, $key = NULL){
+//if person is there, $key is ID for this person in DB.
+//persons dates are adding in DB
 
 	if((preg_match('/^[A-Z][-a-zA-Z]+$/', $name))&&(preg_match('/^[A-Z][-a-zA-Z]+$/', $surname))&&(preg_match('/^[0-9,]{1,2}+$/', $age))){
 
@@ -78,6 +80,7 @@ function add_personal_date($name, $surname, $age, $key = NULL){
 }
 
 function add_person_cat($pers_id, $cat_id){
+//person category is adding(updating) in DB
 
 	$con = connect_DB();
 
@@ -100,6 +103,7 @@ function add_person_cat($pers_id, $cat_id){
 }
 
 function add_person_mark($pers_id, $subj_id, $mark){
+//adding  mark from person and subject exactly.
 
 	$con = connect_DB();
 
@@ -125,6 +129,7 @@ function add_person_mark($pers_id, $subj_id, $mark){
 }
 
 function delete_person($pers_id){
+//person is deleting by Pers id (all dates from this person).
 
 	$con = connect_DB();
 	
@@ -152,68 +157,74 @@ function delete_person($pers_id){
 
 function show_persons(){
 
-
-        $filter=get_form_result($_GET);
-
-	//Get personal date values
-        if($filter['name']){
-                $personal.=" `name`='$filter[name]' and ";
-        }
-        if($filter['surname']){
-                $personal.=" `surname`='$filter[surname]' and ";
-        }
-        if($filter['age']){
-                $personal.=" `age` BETWEEN '$filter[age]' AND ";
-        }else{
-                $personal.=" `age`  BETWEEN '0' AND ";
-        }
-        if($filter['ageto']){
-                $personal.=" '$filter[ageto]' and ";
-        }else{
-                $personal.=" '100' and ";
-        }
+	if(isset($_GET["filter"])){
 	
-	//Get person category 
-	if($filter['category']){
-                $cat_id = get_id_by_name('Categories', $filter['category']);
-        }	
-
-	//Get persons marks
-	$filter_status = array();
-	$filter_status = filter_by_pers_dates($personal);
-	$ides = implode(',', $filter_status) ;
-	if($ides){
-		$pers_ides_str = " and `Pers_ID` IN (".$ides.")";
- 		if($cat_id){
-			$filter_status = filter_by_category($cat_id, $pers_ides_str);
-			if(filter_by_category($cat_id, $pers_ides_str)){
-				$ides = implode(',', $filter_status);
-				if($ides){
-					$pers_ides_str = " and `Pers_ID` IN (".$ides.")";
+        	$filter=get_form_result($_GET);
+	
+		//Get personal date values
+        	if($filter['name']){
+        	        $personal.=" `name`='$filter[name]' and ";
+        	}
+        	if($filter['surname']){
+        	        $personal.=" `surname`='$filter[surname]' and ";
+        	}
+        	if($filter['age']){
+        	        $personal.=" `age` BETWEEN '$filter[age]' AND ";
+        	}else{
+        	        $personal.=" `age`  BETWEEN '0' AND ";
+        	}
+        	if($filter['ageto']){
+        	        $personal.=" '$filter[ageto]' and ";
+        	}else{
+        	        $personal.=" '100' and ";
+	        }
+		
+		//Get person category 
+		if($filter['category']){
+	                $cat_id = get_id_by_name('Categories', $filter['category']);
+	        }	
+	
+		//Get persons marks
+		$filter_status = array();
+		$filter_status = filter_by_pers_dates($personal);
+		$ides = implode(',', $filter_status) ;
+		if($ides){
+			$pers_ides_str = " and `Pers_ID` IN (".$ides.")";
+ 			if($cat_id){
+				$filter_status = filter_by_category($cat_id, $pers_ides_str);
+				if(filter_by_category($cat_id, $pers_ides_str)){
+					$ides = implode(',', $filter_status);
+					if($ides){
+						$pers_ides_str = " and `Pers_ID` IN (".$ides.")";
+					}
 				}
 			}
+			if($filter['js'] || $filter['jsto']){
+				$js_marks = subject_marks_limit('js', $filter['js'], $filter['jsto'], $pers_ides_str);
+				$js_marks_filter = filter_by_subjects_marks($js_marks);
+			}
+			if($filter['php'] || $filter['phpto']){
+				$php_marks = subject_marks_limit('php', $filter['php'], $filter['phpto'], $pers_ides_str);
+				$php_marks_filter = filter_by_subjects_marks($php_marks);
+			}
+			if($js_marks_filter===NULL){
+				$js_marks_filter = $filter_status;
+			}
+			if($php_marks_filter===NULL){
+				$php_marks_filter = $filter_status;
+			}
+			$filter_status = array_uintersect($php_marks_filter, $js_marks_filter, "strcasecmp");
 		}
-		if($filter['js'] || $filter['jsto']){
-			$js_marks = subject_marks_limit('js', $filter['js'], $filter['jsto'], $pers_ides_str);
-			$js_marks_filter = filter_by_subjects_marks($js_marks);
-		}
-		if($filter['php'] || $filter['phpto']){
-			$php_marks = subject_marks_limit('php', $filter['php'], $filter['phpto'], $pers_ides_str);
-			$php_marks_filter = filter_by_subjects_marks($php_marks);
-		}
-		if($js_marks_filter===NULL){
-			$js_marks_filter = $filter_status;
-		}
-		if($php_marks_filter===NULL){
-			$php_marks_filter = $filter_status;
-		}
-		$filter_status = array_uintersect($php_marks_filter, $js_marks_filter, "strcasecmp");
-	}
 
-	//Get personal dates
+		//Get personal dates
 	
-	$persons = get_persons_by_ides($filter_status);
-	show_filter_result($persons);
+		$persons = get_persons_by_ides($filter_status);
+		show_filter_result($persons);
+	}
+}
+
+function update(){
+
 	if(isset($_GET['update'])){
 		for($i=1;$i<=floor(count($_GET)/8);$i++){
         		if(!$_GET['del'.$i]){
@@ -228,6 +239,7 @@ function show_persons(){
         			delete_person($_GET['key'.$i]);
 			}
 		}
+	echo "<p>Dates updated successfully!</p>";
 	}
 }
 
@@ -406,53 +418,77 @@ function isset_date_in_table($table, $pers_id, $subj_id = NULL){
 }
 
 function show_filter_result($persons){
+	if($persons){
 ?>
-	<table>
-		<form method='get' action='edit.php' >	
+		<form  method='get' action='edit.php' class="show-pers" >	
+			<table>
+				<tr>
+                        	        <td>Name</td>
+                               		<td>Surname</td>
+                           	    	<td>Age</td>
+               	                	<td>Category</td>
+	               	                <td>Js</td>
+       	                                <td>Php</td>
+               		                <td></td>
+                        	</tr>
+
 <?php
 		foreach($persons as $key => $person){
 ?>
-			<tr>
-				<td>
-					<input type='checkbox'name='<?php echo $key; ?>' >
-				</td>
-				<td>
-					<?php echo $person["Name"]; ?>
-				</td>
-				<td>
-					<?php echo $person["Surname"]; ?>
-				</td>
-				<td>
-					<?php echo $person["Age"]; ?>
-				</td>
-				<td>
-					<?php echo $person["Category"]; ?>
-				</td>
-				<td>
-					<?php echo $person["js"]; ?>
-				</td>
-				<td>
-					<?php echo $person["php"]; ?>
-				</td>
-			</tr>
+				<tr>
+					<td>
+						<?php echo $person["Name"]; ?>
+					</td>
+					<td>
+						<?php echo $person["Surname"]; ?>
+					</td>
+					<td>
+						<?php echo $person["Age"]; ?>
+					</td>
+					<td>
+						<?php echo $person["Category"]; ?>
+					</td>
+					<td>
+						<?php echo $person["js"]; ?>
+					</td>
+					<td>
+						<?php echo $person["php"]; ?>
+					</td>
+					<td>
+						<input type='checkbox'name='<?php echo $key; ?>' >
+					</td>
+				</tr>
 <?php
 		}
 ?>	
-			<tr>
-				<td>
-					<input type='submit' value='Edit' name='edit'/>
-				</td>
-			</tr>
+				<tr>
+					<td colspan=7>
+						<input type='submit' value='Edit' name='edit'/>
+					</td>
+				</tr>
+			</table>
 		</form>
-	</table>
 <?php
+	}else{
+		echo "<p class='red'>No result!</p>";
+	}
 }
 
 function get_form_by_edit($persons_edit){
 	
 ?>
-	<table>
-		<form method='get' action='filter.php'>	
+	<form method='get' action='filter.php'>	
+		<table class="edit" >
+			<tr>
+                                <td>Name</td>
+                                <td>Surname</td>
+                                <td>Age</td>
+                                <td>Category</td>
+                                <td>Js</td>
+                                <td>Php</td>
+                                <td class="red">Delete</td>
+                        </tr>
+
 	<?php	$n = 1;
 		foreach($persons_edit as $key => $person){
 	?>
@@ -492,11 +528,26 @@ function get_form_by_edit($persons_edit){
 		$n++;	}
 	?>
 			<tr>
-				<td>
+				<td colspan=7>
 					<input type='submit' name='update' value='Update' />
 				</td>
 			</tr>
-		</form>
-	</table>
+		</table>
+	</form>
 <?php
+}
+
+function get_subjects(){
+
+	$con = connect_DB();
+                
+        $result = mysqli_query($con,"SELECT * FROM `Subjects` ");
+        $subjects = array();
+
+        while($row = mysqli_fetch_array($result)) {
+                $subjects[$row["ID"]] = $row["Name"];
+        }
+	return $subjects;
+
+        close_DB(); 
 }

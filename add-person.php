@@ -16,6 +16,7 @@ if($person_added){
         if($add_person["category"]){
                 add_person_cat($person_id , get_id_by_name('Categories', $add_person["category"]));
         }
+	echo "<p class='added' >Person successfuly added!</p>";
 }
 
 ?>

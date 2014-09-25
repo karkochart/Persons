@@ -1,9 +1,7 @@
+<?php require_once("header.php"); ?>
 <?php require_once("functions.php"); ?>
-<html>
-<head>
-</head>
-<body>
-	<form method="get">
+	<h1>Filter persons</h1>
+	<form method="get" class="filter">
 		<table>
 			<tr>
 				<td>Name</td>
@@ -59,12 +57,13 @@
 			</tr>
 		</table>
 	</form>
-<a href='index.php'>Add person</a>
 <?php
 
-show_persons();
+	if(isset($_GET["filter"])){
+		show_persons();
+	}
+	update();
 
 ?>
+<?php require_once("footer.php"); ?>
 
-</body>
-</html>
