@@ -9,10 +9,12 @@
 				<td>Age</td>
 				<td></td>
 				<td>Category</td>
-				<td>Js</td>
-				<td></td>
-				<td>Php</td>
-				<td></td>
+		<?php 
+			$subjs = get_subjects();
+			foreach($subjs as $id => $name){
+				echo "<td colspan=2>$name</td>";
+			}
+		?>
 				<td></td>
 			</tr>
 			<tr>
@@ -33,35 +35,27 @@
 						<?php echo options_html(NULL, NULL, NULL, true); ?>
 					</select>
 				</td>	
+		<?php 
+			$subjs = get_subjects();
+			foreach($subjs as $id => $name){ ?>
 				<td>
-					<select name="js">
+					<select name="subj<?php echo $id; ?>">
 						<?php echo options_html(1,10); ?>
 					</select>
 				</td>			
 				<td>
-					<select name="jsto">
+					<select name="subjto<?php echo $id; ?>">
 						<?php echo options_html(1,10); ?>
 					</select>
 				</td>			
-				<td>
-					<select name="php">
-						<?php echo options_html(1,10); ?>
-					</select>
-				</td>			
-				<td>
-					<select name="phpto">
-						<?php echo options_html(1,10); ?>
-					</select>
-				</td>			
+		<?php } ?>
 				<td><input type="submit" value="Filter persons" name="filter" /></td>
 			</tr>
 		</table>
 	</form>
 <?php
 
-	if(isset($_GET["filter"])){
-		show_persons();
-	}
+	show_persons();
 	update();
 
 ?>

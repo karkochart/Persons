@@ -27,24 +27,21 @@
 					</select>
 				</td>	
 			</tr>
+	<?php
+		$subjs = get_subjects();
+		foreach($subjs as $id => $name){
+	?>
 			<tr>
-				<td>Js</td>
+				<td><?php echo $name; ?></td>
 				<td>
-					<select name="js">
-						 <?php echo options_html(1,10); ?>
+					<select name="subj<?php echo $id; ?>">
+						<?php echo options_html(1,10); ?>
 					</select>
-				</td>			
+				</td>
 			</tr>
+	<?php } ?>
 			<tr>
-				<td>Php</td>
-				<td>
-					<select name="php">
-						 <?php echo options_html(1,10); ?>
-					</select>
-				</td>			
-			</tr>
-			<tr>
-				<td colspan= 2><input type="submit" value="Add person" name="add-person" /></td>
+			<td colspan= 2><input type="submit" value="Add person" name="add-person" /></td>
 			</tr>
 		</table>
 	</form>

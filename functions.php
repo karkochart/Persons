@@ -1,4 +1,39 @@
 <?php
+class Params {
+	private $params = Array();
+
+  	public function __construct() {
+    		$this->_parseParams();
+  	}
+
+  /**
+    * @brief Lookup request params
+    * @param string $name Name of the argument to lookup
+    * @param mixed $default Default value to return if argument is missing
+    * @returns The value from the GET/POST/PUT/DELETE value, or $default if not set
+    */
+ 	public function get($name) {
+    		if (isset($this->params[$name])) {
+     	 		return $this->params[$name];
+    		} else {
+      			return $this->params;
+    		}
+  	}
+
+  	private function _parseParams() {
+    		$method = $_SERVER['REQUEST_METHOD'];
+    		if ($method == "PUT" || $method == "DELETE") {
+        		parse_str(file_get_contents('php://input'), $this->params);
+        		$GLOBALS["_{$method}"] = $this->params;
+        		// Add these request vars into _REQUEST, mimicing default behavior, PUT/DELETE will override existing COOKIE/GET vars
+        		$_REQUEST = $this->params + $_REQUEST;
+    		} else if ($method == "GET") {
+        		$this->params = $_GET;
+    		} else if ($method == "POST") {
+        		$this->params = $_POST;
+    		}
+  	}
+}
 
 function get_form_result($method){
 	
@@ -19,18 +54,17 @@ function get_form_result($method){
 	if($method['category']){
 		$form_result["category"] = $method['category'];
 	}
-	if($method['js']){
-		$form_result["js"] = $method['js'];
+
+	$subjs = get_subjects();
+	foreach($subjs as $id =>$name){
+		if($method["subj".$id]){
+			$form_result["subj".$id] = $method["subj".$id];
+		}
+		if($method["subjto".$id]){
+			$form_result["subjto".$id] = $method["subjto".$id];
+		}
 	}
-	if($method['jsto']){
-		$form_result["jsto"] = $method['jsto'];
-	}
-	if($method['php']){
-		$form_result["php"] = $method['php'];
-	}
-	if($method['phpto']){
-		$form_result["phpto"] = $method['phpto'];
-	}
+
 	return($form_result);
 }
 
@@ -157,9 +191,9 @@ function delete_person($pers_id){
 
 function show_persons(){
 
-	if(isset($_GET["filter"])){
-	
-        	$filter=get_form_result($_GET);
+	$obj = new Params;
+       	$filter = $obj->get();
+	if(isset($filter["filter"])){
 	
 		//Get personal date values
         	if($filter['name']){
@@ -199,21 +233,20 @@ function show_persons(){
 					}
 				}
 			}
-			if($filter['js'] || $filter['jsto']){
-				$js_marks = subject_marks_limit('js', $filter['js'], $filter['jsto'], $pers_ides_str);
-				$js_marks_filter = filter_by_subjects_marks($js_marks);
+			
+			$subj = get_subjects();
+			$filter_status_copy = $filter_status;
+			foreach($subj as $id => $name){
+				if($filter["subj".$id] || $filter["subjto".$id]){
+					$marks = subject_marks_limit($name, $filter["subj".$id], $filter["subjto".$id], $pers_ides_str);
+					$marks_filter[$id] = filter_by_subjects_marks($marks);
+				}
+				if($marks_filter[$id]===NULL){
+					$marks_filter[$id] = $filter_status;
+				}
+				$filter_status_copy = array_uintersect($filter_status_copy, $marks_filter[$id], "strcasecmp");
 			}
-			if($filter['php'] || $filter['phpto']){
-				$php_marks = subject_marks_limit('php', $filter['php'], $filter['phpto'], $pers_ides_str);
-				$php_marks_filter = filter_by_subjects_marks($php_marks);
-			}
-			if($js_marks_filter===NULL){
-				$js_marks_filter = $filter_status;
-			}
-			if($php_marks_filter===NULL){
-				$php_marks_filter = $filter_status;
-			}
-			$filter_status = array_uintersect($php_marks_filter, $js_marks_filter, "strcasecmp");
+			$filter_status = $filter_status_copy;
 		}
 
 		//Get personal dates
@@ -223,23 +256,24 @@ function show_persons(){
 	}
 }
 
-function update(){
+function update($update){
 
-	if(isset($_GET['update'])){
-		for($i=1;$i<=floor(count($_GET)/8);$i++){
-        		if(!$_GET['del'.$i]){
-				add_personal_date($_GET['Name'.$i],$_GET['Surname'.$i],$_GET['Age'.$i],$_GET['key'.$i]);
-				$cat_id = get_id_by_name('Categories',$_GET['Category'.$i]);	
-				add_person_cat($_GET['key'.$i], $cat_id);
-				$subj_id = get_id_by_name('Subjects', 'php');	
-				add_person_mark($_GET['key'.$i], $subj_id, $_GET['php'.$i]);
-				$js_id = get_id_by_name('Subjects', 'js');	
-				add_person_mark($_GET['key'.$i], $js_id, $_GET['js'.$i]);
+	if(isset($update['update'])){
+		for($i=1;$i<=floor(count($update)/8)+1;$i++){
+        		if(!$update['del'.$i]){
+				add_personal_date($update['Name'.$i],$update['Surname'.$i],$update['Age'.$i],$update['key'.$i]);
+				$cat_id = get_id_by_name('Categories',$update['Category'.$i]);	
+				add_person_cat($update['key'.$i], $cat_id);
+				
+				$subjs = get_subjects();
+				foreach($subjs as $id => $name){
+					add_person_mark($update['key'.$i], $id, $update[$i.'subj'.$id]);
+				}
         		}else{
-        			delete_person($_GET['key'.$i]);
+        			delete_person($update['key'.$i]);
 			}
 		}
-	echo "<p>Dates updated successfully!</p>";
+		echo "<p>Dates updated successfully!</p>";
 	}
 }
 
@@ -420,15 +454,18 @@ function isset_date_in_table($table, $pers_id, $subj_id = NULL){
 function show_filter_result($persons){
 	if($persons){
 ?>
-		<form  method='get' action='edit.php' class="show-pers" >	
+		<form  method='put' action='edit.php' class="show-pers" >	
 			<table>
 				<tr>
                         	        <td>Name</td>
                                		<td>Surname</td>
                            	    	<td>Age</td>
                	                	<td>Category</td>
-	               	                <td>Js</td>
-       	                                <td>Php</td>
+		<?php $subjs = get_subjects();
+			foreach($subjs as $id => $name){
+		?> 
+                                <td><?php echo $name; ?></td>
+		<?php } ?>
                		                <td></td>
                         	</tr>
 
@@ -448,12 +485,13 @@ function show_filter_result($persons){
 					<td>
 						<?php echo $person["Category"]; ?>
 					</td>
+		<?php 
+			foreach($subjs as $id => $name){
+		?> 
 					<td>
-						<?php echo $person["js"]; ?>
+						<?php echo $person[$name]; ?>
 					</td>
-					<td>
-						<?php echo $person["php"]; ?>
-					</td>
+		<?php } ?>
 					<td>
 						<input type='checkbox'name='<?php echo $key; ?>' >
 					</td>
@@ -477,15 +515,18 @@ function show_filter_result($persons){
 function get_form_by_edit($persons_edit){
 	
 ?>
-	<form method='get' action='filter.php'>	
+	<form method='get' >	
 		<table class="edit" >
 			<tr>
                                 <td>Name</td>
                                 <td>Surname</td>
                                 <td>Age</td>
                                 <td>Category</td>
-                                <td>Js</td>
-                                <td>Php</td>
+		<?php $subjs = get_subjects();
+			foreach($subjs as $id => $name){
+		?> 
+                                <td><?php echo $name; ?></td>
+		<?php } ?>
                                 <td class="red">Delete</td>
                         </tr>
 
@@ -510,16 +551,16 @@ function get_form_by_edit($persons_edit){
 						<?php echo options_html(NULL, NULL, NULL, $person['Category']); ?>
 					</select>
 				</td>
+
+		<?php 
+			foreach($subjs as $id => $name){
+		?>	
 				<td>
-					<select name='js<?php echo $n; ?>' >
-						<?php echo options_html(1, 10, $person['js']); ?>
+					<select name='<?php echo $n."subj".$id; ?>' >
+						<?php echo options_html(1, 10, $person[$name]); ?>
 					</select>
 				</td>
-				<td>
-					<select name='php<?php echo $n; ?>' >
-						<?php echo options_html(1, 10, $person['php']); ?>
-					</select>
-				</td>
+		<?php } ?>
 				<td>
 					<input type='checkbox'name='del<?php echo $n; ?>' >
 				</td>
