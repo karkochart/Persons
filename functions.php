@@ -167,20 +167,7 @@ function delete_person($pers_id){
 
 	$con = connect_DB();
 	
-	//delete person personal date 
 	$sql = "DELETE FROM `Persons`.`Personal` WHERE `Personal`.`ID` = '$pers_id' ";
-	if (!mysqli_query($con,$sql)) {
-		die('Error: ' . mysqli_error($con));
-	}
-
-	//delete person category
-	$sql = "DELETE FROM `Persons`.`Marks` WHERE `Marks`.`Pers_ID` = '$pers_id' ";
-	if (!mysqli_query($con,$sql)) {
-		die('Error: ' . mysqli_error($con));
-	}
-
-	//delete person marks
-	$sql = "DELETE FROM `Persons`.`State` WHERE `State`.`Pers_ID` = '$pers_id' ";
 	if (!mysqli_query($con,$sql)) {
 		die('Error: ' . mysqli_error($con));
 	}

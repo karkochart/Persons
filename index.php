@@ -15,7 +15,7 @@
 				<td>Age *</td>
 				<td>
 					<select name="age">
-						 <?php echo options_html(16,80); ?>
+						<option></option>
 					</select>
 				</td>			
 			</tr>
@@ -35,7 +35,7 @@
 				<td><?php echo $name; ?></td>
 				<td>
 					<select name="subj<?php echo $id; ?>">
-						<?php echo options_html(1,10); ?>
+						<option></option>
 					</select>
 				</td>
 			</tr>

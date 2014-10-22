@@ -11,6 +11,9 @@ $(document).ready(function(){
 	
 	countChecked();
 	$( ".show-pers input[type=checkbox]" ).on( "click", countChecked );	
+	
+	$("select[name='age']").append(options_html(16,80));
+	$("select[name^='subj']").append(options_html(1,10));
 
 });//end Ready
 
@@ -49,3 +52,21 @@ function countChecked() {
 		$('.show-pers input[type="submit"]').attr('type','button');
 	}
 }
+
+function options_html(from, to, select = false, cat = false){
+        options = "";
+        i = from;
+       // if(from && to){
+                while(i<=to){
+                        if(select == i){
+                                selected = " selected ";
+                        }else{
+                                selected = '';
+                        }
+                        options += "<option " + selected + ">" + i + "</option>";
+                        i++;
+                }
+       // }
+        return options;
+}
+
